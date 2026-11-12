@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f7f4" />
+    <title>RuangUang — Atur keuanganmu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#overview" aria-label="RuangUang beranda">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M5 10.5A3.5 3.5 0 0 1 8.5 7H25v18H8.5A3.5 3.5 0 0 1 5 21.5v-11Z" stroke="currentColor" stroke-width="2.4"/><path d="M5 11h20M20 17h8v5h-8a2.5 2.5 0 1 1 0-5Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="21" cy="19.5" r=".8" fill="currentColor"/></svg>
+          </span>
+          <span>ruang<span class="brand-light">uang</span></span>
+        </a>
+
+        <div class="nav-label">MENU</div>
+        <nav class="main-nav" aria-label="Navigasi utama">
+          <a class="nav-link active" href="#overview">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="11" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="8" height="7" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
+            Ringkasan
+          </a>
+          <a class="nav-link" href="#transactions">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3v3m10-3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m9 14 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Transaksi
+          </a>
+          <a class="nav-link" href="#budgets">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V9m5 10V5m6 14v-7m5 7V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 21h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Anggaran
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <div class="sidebar-tip">
+            <span class="tip-icon" aria-hidden="true">✦</span>
+            <p class="tip-title">Sedikit demi sedikit</p>
+            <p class="tip-copy">Kebiasaan kecil hari ini, bikin tujuan besar terasa lebih dekat.</p>
+          </div>
+          <div class="privacy-note"><span class="privacy-dot"></span> Data tersimpan di perangkatmu</div>
+        </div>
+      </aside>
+
+      <main class="main-content" id="overview">
+        <header class="topbar">
+          <div class="mobile-brand"><span class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><path d="M5 10.5A3.5 3.5 0 0 1 8.5 7H25v18H8.5A3.5 3.5 0 0 1 5 21.5v-11Z" stroke="currentColor" stroke-width="2.4"/><path d="M5 11h20M20 17h8v5h-8a2.5 2.5 0 1 1 0-5Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><b>ruang<span class="brand-light">uang</span></b></div>
+          <div class="greeting">
+            <p class="eyebrow" id="today-label">RINGKASAN KEUANGAN</p>
+            <h1>Keuanganmu, <span>lebih terarah.</span></h1>
+          </div>
+          <button class="primary-button top-add" type="button" data-open-modal>
+            <span class="plus">+</span> Catat transaksi
+          </button>
+        </header>
+
+        <section class="summary-grid" aria-label="Ringkasan keuangan">
+          <article class="summary-card balance-card">
+            <div class="card-topline"><span>Total saldo</span><span class="card-icon balance-icon" aria-hidden="true">↗</span></div>
+            <p class="summary-value" id="balance-total">Rp0</p>
+            <p class="card-caption"><span class="status-dot"></span> Saldo dari semua transaksi</p>
+            <div class="balance-decoration" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          </article>
+          <article class="summary-card">
+            <div class="card-topline"><span>Pemasukan bulan ini</span><span class="card-icon income-icon" aria-hidden="true">↓</span></div>
+            <p class="summary-value" id="income-total">Rp0</p>
+            <p class="card-caption" id="income-caption">Belum ada pemasukan bulan ini</p>
+          </article>
+          <article class="summary-card">
+            <div class="card-topline"><span>Pengeluaran bulan ini</span><span class="card-icon expense-icon" aria-hidden="true">↑</span></div>
+            <p class="summary-value" id="expense-total">Rp0</p>
+            <p class="card-caption" id="expense-caption">Belum ada pengeluaran bulan ini</p>
+          </article>
+        </section>
+
+        <section class="insights-grid" aria-label="Analisis keuangan">
+          <article class="panel cashflow-panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">ARUS KAS</p><h2>Pergerakan uang</h2></div>
+              <span class="period-pill" id="chart-period">7 hari terakhir</span>
+            </div>
+            <div class="chart-legend"><span><i class="legend-dot income-legend"></i>Pemasukan</span><span><i class="legend-dot expense-legend"></i>Pengeluaran</span></div>
+            <div class="chart-wrap"><canvas id="cashflow-chart" aria-label="Grafik pemasukan dan pengeluaran selama tujuh hari terakhir"></canvas></div>
+          </article>
+          <article class="panel budget-panel" id="budgets">
+            <div class="panel-heading">
+              <div><p class="eyebrow">PANTAU PENGELUARAN</p><h2>Anggaran kategori</h2></div>
+              <div class="budget-actions"><span class="month-label" id="budget-month"></span><button class="budget-edit-button" type="button" id="edit-budgets">Atur</button></div>
+            </div>
+            <div class="budget-list" id="budget-list"></div>
+            <p class="budget-footnote">Batas anggaran bulanan · disimpan di perangkatmu</p>
+          </article>
+        </section>
+
+        <section class="panel transactions-panel" id="transactions">
+          <div class="transactions-heading">
+            <div><p class="eyebrow">AKTIVITAS TERBARU</p><h2>Transaksi</h2></div>
+            <div class="transaction-controls">
+              <label class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                <input type="search" id="search-input" placeholder="Cari transaksi..." aria-label="Cari transaksi" />
+              </label>
+              <select id="type-filter" class="filter-select" aria-label="Filter jenis transaksi">
+                <option value="all">Semua</option>
+                <option value="income">Pemasukan</option>
+                <option value="expense">Pengeluaran</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>TRANSAKSI</th><th>KATEGORI</th><th>TANGGAL</th><th class="amount-heading">JUMLAH</th><th><span class="sr-only">Aksi</span></th></tr></thead>
+              <tbody id="transaction-list"></tbody>
+            </table>
+            <div class="empty-state" id="empty-state">
+              <span class="empty-icon" aria-hidden="true">＋</span>
+              <strong>Belum ada transaksi</strong>
+              <p>Mulai catat pemasukan atau pengeluaran pertamamu.</p>
+              <button class="text-button" type="button" data-open-modal>Tambah transaksi <span>→</span></button>
+            </div>
+          </div>
+          <div class="table-footer"><span id="transaction-count">0 transaksi</span><span>Data pribadimu, selalu dalam kendalimu.</span></div>
+        </section>
+
+        <footer class="page-footer">Dibuat untuk keputusan finansial yang lebih tenang <span>✦</span></footer>
+      </main>
+    </div>
+
+    <dialog class="transaction-dialog" id="transaction-dialog" aria-labelledby="dialog-title">
+      <form id="transaction-form">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">CATAT AKTIVITAS</p><h2 id="dialog-title">Transaksi baru</h2></div>
+          <button class="close-button" type="button" aria-label="Tutup" data-close-modal>×</button>
+        </div>
+        <div class="type-toggle" role="group" aria-label="Jenis transaksi">
+          <button type="button" class="type-option selected" data-type="expense">Pengeluaran</button>
+          <button type="button" class="type-option" data-type="income">Pemasukan</button>
+        </div>
+        <input type="hidden" name="type" id="form-type" value="expense" />
+        <label class="field-label" for="description">Nama transaksi</label>
+        <input class="form-control" id="description" name="description" type="text" maxlength="60" placeholder="Contoh: Belanja mingguan" required />
+        <label class="field-label" for="amount">Jumlah</label>
+        <div class="amount-input"><span>Rp</span><input class="form-control" id="amount" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" required /></div>
+        <div class="form-row">
+          <div><label class="field-label" for="category">Kategori</label><select class="form-control" id="category" name="category" required></select></div>
+          <div><label class="field-label" for="date">Tanggal</label><input class="form-control" id="date" name="date" type="date" required /></div>
+        </div>
+        <button class="primary-button submit-button" type="submit">Simpan transaksi <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog class="transaction-dialog budget-dialog" id="budget-dialog" aria-labelledby="budget-dialog-title">
+      <form id="budget-form">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">RENCANAKAN PENGELUARAN</p><h2 id="budget-dialog-title">Atur anggaran bulanan</h2></div>
+          <button class="close-button" type="button" aria-label="Tutup" data-close-budget>×</button>
+        </div>
+        <p class="budget-dialog-copy">Tentukan batas untuk setiap kategori pengeluaran.</p>
+        <div class="budget-fields" id="budget-fields"></div>
+        <button class="primary-button submit-button" type="submit">Simpan anggaran <span>→</span></button>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
