@@ -134,6 +134,21 @@
         </section>
 
         <section class="page-view sales-page" id="iphone-sales" hidden>
+        <nav class="sales-section-nav" aria-label="Menu dashboard jualan iPhone">
+          <button class="sales-section-link active" type="button" data-sales-view="dashboard" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="11" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="8" height="7" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
+            Dashboard
+          </button>
+          <button class="sales-section-link" type="button" data-sales-view="transactions">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3v3m10-3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m9 14 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Penjualan
+          </button>
+          <button class="sales-section-link" type="button" data-sales-view="inventory">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4-9-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m3 12 9 4 9-4M3 17l9 4 9-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Barang Masuk
+          </button>
+        </nav>
+        <div class="sales-view" id="sales-dashboard-view">
         <section class="welcome-banner" aria-label="Informasi halaman">
           <div>
             <p class="banner-kicker">PANEL PENJUALAN</p>
@@ -148,7 +163,7 @@
           <div class="banner-date"><span class="live-dot"></span><span id="current-date"></span></div>
         </section>
 
-        <section class="summary-grid" aria-label="Ringkasan penjualan bulan ini">
+        <section class="summary-grid sales-summary-grid" aria-label="Ringkasan penjualan bulan ini">
           <article class="summary-card revenue-card">
             <div class="card-topline"><span>Omzet bulan ini</span><span class="card-icon revenue-icon" aria-hidden="true">↗</span></div>
             <p class="summary-value" id="revenue-total">Rp0</p>
@@ -165,8 +180,38 @@
             <p class="summary-value" id="sales-total">0</p>
             <p class="card-caption" id="sales-caption">Catatan penjualan bulan ini</p>
           </article>
+          <article class="summary-card">
+            <div class="card-topline"><span>Stok tersedia</span><span class="card-icon units-icon" aria-hidden="true">▣</span></div>
+            <p class="summary-value" id="stock-total">0 unit</p>
+            <p class="card-caption" id="stock-caption">Tambahkan barang masuk</p>
+          </article>
         </section>
+        <footer class="page-footer">Dibuat untuk membantu tokomu terus berkembang <span>✦</span></footer>
+        </div>
 
+        <div class="sales-view" id="sales-inventory-view" hidden>
+          <section class="panel transactions-panel inventory-panel">
+            <div class="transactions-heading">
+              <div><p class="eyebrow">STOK TOKO</p><h2>Barang masuk</h2><p class="section-copy">Masukkan stok iPhone di sini agar bisa dipilih saat dicatat terjual.</p></div>
+              <button class="primary-button inventory-add-button" type="button" data-open-inventory-modal><span class="plus">+</span> Tambah barang</button>
+            </div>
+            <div class="table-scroll">
+              <table class="inventory-table">
+                <thead><tr><th>PRODUK</th><th>STOK TERSEDIA</th><th>HARGA MODAL / UNIT</th><th>TANGGAL MASUK</th><th><span class="sr-only">Aksi</span></th></tr></thead>
+                <tbody id="inventory-list"></tbody>
+              </table>
+              <div class="empty-state visible" id="inventory-empty-state">
+                <span class="empty-icon" aria-hidden="true">▣</span>
+                <strong id="inventory-empty-title">Belum ada barang masuk</strong>
+                <p id="inventory-empty-copy">Tambahkan stok iPhone sebelum mencatat penjualan.</p>
+                <button class="text-button" type="button" data-open-inventory-modal>Tambah barang masuk <span>→</span></button>
+              </div>
+            </div>
+            <div class="table-footer"><span id="inventory-count">0 unit tersedia</span><span>Stok akan berkurang otomatis saat barang terjual.</span></div>
+          </section>
+        </div>
+
+        <div class="sales-view" id="sales-transactions-view" hidden>
         <section class="panel transactions-panel" id="transactions">
           <div class="transactions-heading">
             <div><p class="eyebrow">CATATAN TOKO</p><h2>Transaksi penjualan</h2><p class="section-copy">Daftar penjualan iPhone yang sudah tercatat.</p></div>
@@ -197,8 +242,7 @@
           </div>
           <div class="table-footer"><span id="transaction-count">0 transaksi</span><span>Data penjualan tersimpan di perangkatmu.</span></div>
         </section>
-
-        <footer class="page-footer">Dibuat untuk membantu tokomu terus berkembang <span>✦</span></footer>
+        </div>
         </section>
       </main>
     </div>
@@ -209,18 +253,12 @@
           <div><p class="eyebrow">TRANSAKSI TOKO</p><h2 id="dialog-title">Catat penjualan</h2></div>
           <button class="close-button" type="button" aria-label="Tutup" data-close-modal>×</button>
         </div>
-        <label class="field-label" for="model">Model iPhone</label>
-        <input class="form-control" id="model" name="model" type="text" list="iphone-models" maxlength="50" placeholder="Contoh: iPhone 16 Pro Max" required />
-        <datalist id="iphone-models">
-          <option value="iPhone 17 Pro Max"></option><option value="iPhone 17 Pro"></option><option value="iPhone 17"></option><option value="iPhone Air"></option>
-          <option value="iPhone 16 Pro Max"></option><option value="iPhone 16 Pro"></option><option value="iPhone 16 Plus"></option><option value="iPhone 16"></option>
-          <option value="iPhone 15 Pro Max"></option><option value="iPhone 15 Pro"></option><option value="iPhone 15 Plus"></option><option value="iPhone 15"></option>
-          <option value="iPhone 14 Pro Max"></option><option value="iPhone 14 Pro"></option><option value="iPhone 14 Plus"></option><option value="iPhone 14"></option>
-          <option value="iPhone 13"></option><option value="iPhone 12"></option><option value="iPhone SE"></option>
-        </datalist>
-        <div class="form-row">
-          <div><label class="field-label" for="storage">Kapasitas</label><select class="form-control" id="storage" name="storage" required><option value="" disabled selected>Pilih kapasitas</option><option>64 GB</option><option>128 GB</option><option>256 GB</option><option>512 GB</option><option>1 TB</option><option>2 TB</option></select></div>
-          <div><label class="field-label" for="color">Warna</label><input class="form-control" id="color" name="color" type="text" maxlength="30" placeholder="Contoh: Natural Titanium" required /></div>
+        <label class="field-label" for="sale-stock">Pilih barang dari stok masuk</label>
+        <select class="form-control" id="sale-stock" name="stockId" required></select>
+        <p class="stock-hint" id="sale-stock-hint">Pilih model dan kapasitas yang akan dijual.</p>
+        <div class="stock-empty-note" id="sale-stock-empty" hidden>
+          <span>Belum ada stok iPhone yang tersedia.</span>
+          <button class="text-button" type="button" data-go-inventory>Input barang masuk <span>→</span></button>
         </div>
         <label class="field-label" for="customer">Nama pembeli</label>
         <input class="form-control" id="customer" name="customer" type="text" maxlength="60" placeholder="Nama pelanggan" required />
@@ -231,6 +269,27 @@
         <label class="field-label" for="amount">Harga jual</label>
         <div class="amount-input"><span>Rp</span><input class="form-control" id="amount" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="Contoh: 18999000" required /></div>
         <button class="primary-button submit-button" type="submit">Simpan penjualan <span>→</span></button>
+      </form>
+    </dialog>
+    <dialog class="transaction-dialog" id="inventory-dialog" aria-labelledby="inventory-dialog-title">
+      <form id="inventory-form">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">TAMBAH KE STOK TOKO</p><h2 id="inventory-dialog-title">Barang masuk</h2></div>
+          <button class="close-button" type="button" aria-label="Tutup" data-close-inventory-modal>×</button>
+        </div>
+        <label class="field-label" for="stock-model">Model iPhone</label>
+        <select class="form-control" id="stock-model" name="model" required></select>
+        <div class="form-row">
+          <div><label class="field-label" for="stock-storage">Kapasitas</label><select class="form-control" id="stock-storage" name="storage" required><option value="" disabled selected>Pilih kapasitas</option><option>64 GB</option><option>128 GB</option><option>256 GB</option><option>512 GB</option><option>1 TB</option><option>2 TB</option></select></div>
+          <div><label class="field-label" for="stock-color">Warna</label><input class="form-control" id="stock-color" name="color" type="text" maxlength="30" placeholder="Contoh: Midnight" required /></div>
+        </div>
+        <div class="form-row">
+          <div><label class="field-label" for="stock-quantity">Jumlah unit masuk</label><input class="form-control" id="stock-quantity" name="quantity" type="number" min="1" step="1" inputmode="numeric" placeholder="1" required /></div>
+          <div><label class="field-label" for="stock-date">Tanggal masuk</label><input class="form-control" id="stock-date" name="date" type="date" required /></div>
+        </div>
+        <label class="field-label" for="stock-cost">Harga modal per unit <span class="optional-label">(opsional)</span></label>
+        <div class="amount-input"><span>Rp</span><input class="form-control" id="stock-cost" name="unitCost" type="number" min="0" step="1" inputmode="numeric" placeholder="Kosongkan jika tidak dicatat" /></div>
+        <button class="primary-button submit-button" type="submit">Simpan barang masuk <span>→</span></button>
       </form>
     </dialog>
     <dialog class="transaction-dialog" id="finance-dialog" aria-labelledby="finance-dialog-title">
