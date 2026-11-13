@@ -1,12 +1,14 @@
-const STORAGE_KEY = "ruanguang.transactions.v1";
-const BUDGET_STORAGE_KEY = "ruanguang.budgets.v1";
-const categories = {
+const SALES_STORAGE_KEY = "sellphone.sales.v1";
+const FINANCE_STORAGE_KEY = "ruanguang.transactions.v1";
+const paymentMethods = ["Transfer", "Tunai", "QRIS"];
+const financeCategories = {
   expense: [
-    { name: "Makanan", icon: "🍜", budget: 1500000 },
-    { name: "Transportasi", icon: "🚗", budget: 700000 },
-    { name: "Belanja", icon: "🛍️", budget: 1000000 },
-    { name: "Tagihan", icon: "⚡", budget: 900000 },
-    { name: "Lainnya", icon: "✦", budget: 500000 },
+    { name: "Makanan", icon: "🍜" },
+    { name: "Transportasi", icon: "🚗" },
+    { name: "Belanja", icon: "🛍️" },
+    { name: "Tagihan", icon: "⚡" },
+    { name: "Kesehatan", icon: "✚" },
+    { name: "Lainnya", icon: "✦" },
   ],
   income: [
     { name: "Gaji", icon: "💼" },
@@ -16,100 +18,96 @@ const categories = {
     { name: "Lainnya", icon: "✦" },
   ],
 };
-
 const moneyFormat = new Intl.NumberFormat("id-ID", {
   style: "currency",
   currency: "IDR",
   maximumFractionDigits: 0,
-});
-const shortMoneyFormat = new Intl.NumberFormat("id-ID", {
-  notation: "compact",
-  maximumFractionDigits: 1,
 });
 const dateFormat = new Intl.DateTimeFormat("id-ID", {
   day: "numeric",
   month: "short",
   year: "numeric",
 });
-const monthFormat = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" });
 
 const transactionList = document.querySelector("#transaction-list");
 const emptyState = document.querySelector("#empty-state");
 const dialog = document.querySelector("#transaction-dialog");
 const form = document.querySelector("#transaction-form");
-const typeInput = document.querySelector("#form-type");
-const categoryInput = document.querySelector("#category");
 const searchInput = document.querySelector("#search-input");
-const typeFilter = document.querySelector("#type-filter");
+const paymentFilter = document.querySelector("#payment-filter");
+const financeDialog = document.querySelector("#finance-dialog");
+const financeForm = document.querySelector("#finance-form");
+const financeTypeInput = document.querySelector("#finance-type");
+const financeCategoryInput = document.querySelector("#finance-category");
+const financeTransactionList = document.querySelector("#finance-transaction-list");
+const financeSearchPeriods = document.querySelectorAll("[data-period]");
 const toast = document.querySelector("#toast");
-const budgetDialog = document.querySelector("#budget-dialog");
-const budgetForm = document.querySelector("#budget-form");
-const budgetFields = document.querySelector("#budget-fields");
-let activeType = "expense";
+const pageAction = document.querySelector("#page-action");
 let toastTimer;
-let budgets = loadBudgets();
-let transactions = loadTransactions();
+let sales = loadData(SALES_STORAGE_KEY, isValidSale, "penjualan");
+let financeTransactions = loadData(FINANCE_STORAGE_KEY, isValidFinanceTransaction, "keuangan");
+let activeFinanceType = "expense";
+let activePeriod = "day";
+let currentPage = "finance";
 
-function loadTransactions() {
+function isValidDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00`);
+  const [year, month, day] = value.split("-").map(Number);
+  return !Number.isNaN(date.getTime()) &&
+    date.getFullYear() === year &&
+    date.getMonth() + 1 === month &&
+    date.getDate() === day;
+}
+
+function isValidSale(sale) {
+  return sale &&
+    typeof sale.id === "string" &&
+    typeof sale.model === "string" &&
+    typeof sale.storage === "string" &&
+    typeof sale.color === "string" &&
+    typeof sale.customer === "string" &&
+    paymentMethods.includes(sale.payment) &&
+    Number.isSafeInteger(sale.amount) &&
+    sale.amount > 0 &&
+    isValidDate(sale.date);
+}
+
+function isValidFinanceTransaction(item) {
+  return item &&
+    typeof item.id === "string" &&
+    (item.type === "income" || item.type === "expense") &&
+    typeof item.description === "string" &&
+    Number.isSafeInteger(item.amount) &&
+    item.amount > 0 &&
+    typeof item.category === "string" &&
+    isValidDate(item.date);
+}
+
+function loadData(key, validator, label) {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(key);
     if (!stored) return [];
     const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed)) throw new Error("Format data transaksi tidak valid.");
-    return parsed.filter((item) =>
-      item &&
-      typeof item.id === "string" &&
-      (item.type === "income" || item.type === "expense") &&
-      typeof item.description === "string" &&
-      Number.isFinite(item.amount) &&
-      item.amount > 0 &&
-      typeof item.category === "string" &&
-      isValidDate(item.date),
-    );
+    if (!Array.isArray(parsed)) throw new Error(`Format data ${label} tidak valid.`);
+    const validItems = parsed.filter(validator);
+    if (validItems.length !== parsed.length) {
+      console.error(`Sebagian data ${label} tidak valid dan tidak ditampilkan.`);
+      showToast(`Sebagian data ${label} tidak dapat dibaca.`);
+    }
+    return validItems;
   } catch (error) {
-    console.error("Gagal membaca data transaksi:", error);
-    showToast("Data transaksi tidak dapat dibaca.");
+    console.error(`Gagal membaca data ${label}:`, error);
+    showToast(`Data ${label} tidak dapat dibaca.`);
     return [];
   }
 }
 
-function loadBudgets() {
-  const defaults = Object.fromEntries(categories.expense.map((category) => [category.name, category.budget]));
+function saveData(key, data, label) {
   try {
-    const stored = localStorage.getItem(BUDGET_STORAGE_KEY);
-    if (!stored) return defaults;
-    const parsed = JSON.parse(stored);
-    if (!parsed || typeof parsed !== "object" || categories.expense.some((category) => !Number.isSafeInteger(parsed[category.name]) || parsed[category.name] <= 0)) {
-      throw new Error("Format anggaran tidak valid.");
-    }
-    return parsed;
+    localStorage.setItem(key, JSON.stringify(data));
   } catch (error) {
-    console.error("Gagal membaca data anggaran:", error);
-    showToast("Data anggaran tidak dapat dibaca; nilai bawaan digunakan.");
-    return defaults;
-  }
-}
-
-function saveBudgets() {
-  try {
-    localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(budgets));
-  } catch (error) {
-    console.error("Gagal menyimpan data anggaran:", error);
-    showToast("Gagal menyimpan anggaran. Periksa ruang penyimpanan browser.");
-    return false;
-  }
-  return true;
-}
-
-function isValidDate(value) {
-  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T00:00:00`).getTime());
-}
-
-function saveTransactions() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-  } catch (error) {
-    console.error("Gagal menyimpan data transaksi:", error);
+    console.error(`Gagal menyimpan data ${label}:`, error);
     showToast("Gagal menyimpan. Periksa ruang penyimpanan browser.");
     return false;
   }
@@ -127,51 +125,60 @@ function localDateKey(date) {
   return `${year}-${month}-${day}`;
 }
 
-function currentMonthTransactions() {
+function currentMonthItems(items) {
   const now = new Date();
   const monthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  return transactions.filter((item) => item.date.startsWith(monthPrefix));
+  return items.filter((item) => item.date.startsWith(monthPrefix));
 }
 
 function sumFor(items, type) {
   return items.reduce((total, item) => total + (item.type === type ? item.amount : 0), 0);
 }
 
-function renderSummary() {
-  const monthly = currentMonthTransactions();
-  const income = sumFor(monthly, "income");
-  const expense = sumFor(monthly, "expense");
-  document.querySelector("#balance-total").textContent = formatMoney(sumFor(transactions, "income") - sumFor(transactions, "expense"));
-  document.querySelector("#income-total").textContent = formatMoney(income);
-  document.querySelector("#expense-total").textContent = formatMoney(expense);
-  document.querySelector("#income-caption").textContent = income ? `${monthly.filter((item) => item.type === "income").length} transaksi bulan ini` : "Belum ada pemasukan bulan ini";
-  document.querySelector("#expense-caption").textContent = expense ? `${monthly.filter((item) => item.type === "expense").length} transaksi bulan ini` : "Belum ada pengeluaran bulan ini";
-  document.querySelector("#budget-month").textContent = monthFormat.format(new Date());
+function renderFinanceSummary() {
+  const now = new Date();
+  const todayKey = localDateKey(now);
+  const today = financeTransactions.filter((item) => item.date === todayKey);
+  const monthly = currentMonthItems(financeTransactions);
+  document.querySelector("#finance-today-date").textContent = new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(now);
+  document.querySelector("#finance-balance").textContent = formatMoney(
+    sumFor(financeTransactions, "income") - sumFor(financeTransactions, "expense"),
+  );
+  document.querySelector("#daily-income").textContent = formatMoney(sumFor(today, "income"));
+  document.querySelector("#daily-expense").textContent = formatMoney(sumFor(today, "expense"));
+  document.querySelector("#monthly-income").textContent = formatMoney(sumFor(monthly, "income"));
+  document.querySelector("#monthly-expense").textContent = formatMoney(sumFor(monthly, "expense"));
+  document.querySelector("#daily-income-caption").textContent = today.filter((item) => item.type === "income").length
+    ? `${today.filter((item) => item.type === "income").length} transaksi hari ini`
+    : "Belum ada pemasukan hari ini";
+  document.querySelector("#daily-expense-caption").textContent = today.filter((item) => item.type === "expense").length
+    ? `${today.filter((item) => item.type === "expense").length} transaksi hari ini`
+    : "Belum ada pengeluaran hari ini";
+  document.querySelector("#monthly-income-caption").textContent = monthly.filter((item) => item.type === "income").length
+    ? `${monthly.filter((item) => item.type === "income").length} transaksi bulan ini`
+    : "Belum ada pemasukan bulan ini";
+  document.querySelector("#monthly-expense-caption").textContent = monthly.filter((item) => item.type === "expense").length
+    ? `${monthly.filter((item) => item.type === "expense").length} transaksi bulan ini`
+    : "Belum ada pengeluaran bulan ini";
 }
 
-function renderTransactions() {
-  const query = searchInput.value.trim().toLocaleLowerCase("id-ID");
-  const type = typeFilter.value;
-  const filtered = [...transactions]
-    .filter((item) => type === "all" || item.type === type)
-    .filter((item) => `${item.description} ${item.category}`.toLocaleLowerCase("id-ID").includes(query))
-    .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
-
-  transactionList.replaceChildren(...filtered.map((item) => {
-    const row = document.createElement("tr");
-    const category = [...categories.income, ...categories.expense].find((entry) => entry.name === item.category);
-    const symbol = category ? category.icon : "✦";
-    row.innerHTML = `
-      <td><span class="transaction-name"><span class="transaction-symbol">${symbol}</span>${escapeHtml(item.description)}</span></td>
-      <td><span class="category-tag">${escapeHtml(item.category)}</span></td>
-      <td class="date-cell">${dateFormat.format(new Date(`${item.date}T00:00:00`))}</td>
-      <td class="amount-cell ${item.type}">${item.type === "income" ? "+" : "−"}${escapeHtml(formatMoney(item.amount))}</td>
-      <td><button class="delete-button" type="button" data-delete-id="${escapeHtml(item.id)}" aria-label="Hapus ${escapeHtml(item.description)}">×</button></td>`;
-    return row;
-  }));
-  emptyState.classList.toggle("visible", filtered.length === 0);
-  transactionList.hidden = filtered.length === 0;
-  document.querySelector("#transaction-count").textContent = `${filtered.length} transaksi`;
+function renderSalesSummary() {
+  const monthlySales = currentMonthItems(sales);
+  const revenue = monthlySales.reduce((total, sale) => total + sale.amount, 0);
+  document.querySelector("#revenue-total").textContent = formatMoney(revenue);
+  document.querySelector("#units-total").textContent = `${monthlySales.length} unit`;
+  document.querySelector("#units-caption").textContent = monthlySales.length
+    ? `${monthlySales.length} iPhone terjual bulan ini`
+    : "Belum ada unit terjual bulan ini";
+  document.querySelector("#sales-total").textContent = String(monthlySales.length);
+  document.querySelector("#sales-caption").textContent = monthlySales.length
+    ? `${monthlySales.length} transaksi tercatat bulan ini`
+    : "Catatan penjualan bulan ini";
 }
 
 function escapeHtml(value) {
@@ -184,138 +191,75 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function renderBudgets() {
-  const spending = currentMonthTransactions().filter((item) => item.type === "expense");
-  const container = document.querySelector("#budget-list");
-  container.replaceChildren(...categories.expense.map((category) => {
-    const spent = spending.filter((item) => item.category === category.name).reduce((total, item) => total + item.amount, 0);
-    const limit = budgets[category.name];
-    const percentage = Math.round((spent / limit) * 100);
-    const row = document.createElement("div");
-    row.className = "budget-item";
+function renderSalesTransactions() {
+  const query = searchInput.value.trim().toLocaleLowerCase("id-ID");
+  const payment = paymentFilter.value;
+  const filtered = [...sales]
+    .filter((sale) => payment === "all" || sale.payment === payment)
+    .filter((sale) => `${sale.model} ${sale.storage} ${sale.color} ${sale.customer}`.toLocaleLowerCase("id-ID").includes(query))
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+
+  transactionList.replaceChildren(...filtered.map((sale) => {
+    const row = document.createElement("tr");
     row.innerHTML = `
-      <span class="budget-icon" aria-hidden="true">${category.icon}</span>
-      <div class="budget-info">
-        <div class="budget-meta"><span class="budget-name">${escapeHtml(category.name)}</span><span class="budget-amount">${escapeHtml(shortMoneyFormat.format(spent))} / ${escapeHtml(shortMoneyFormat.format(limit))}</span></div>
-        <div class="budget-track" role="progressbar" aria-label="Anggaran ${escapeHtml(category.name)}" aria-valuenow="${Math.min(percentage, 100)}" aria-valuemin="0" aria-valuemax="100"><div class="budget-fill ${percentage > 100 ? "over" : ""}" style="width: ${Math.min(percentage, 100)}%"></div></div>
-      </div>
-      <span class="budget-percent">${percentage}%</span>`;
+      <td><span class="product-cell"><span class="product-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="6" y="2.5" width="12" height="19" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M10 5h4M10.5 18.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><span class="product-details"><span class="product-name">${escapeHtml(sale.model)}</span><span class="product-meta">${escapeHtml(sale.storage)} · ${escapeHtml(sale.color)}</span></span></span></td>
+      <td class="customer-name">${escapeHtml(sale.customer)}</td>
+      <td><span class="payment-tag">${escapeHtml(sale.payment)}</span></td>
+      <td class="date-cell">${dateFormat.format(new Date(`${sale.date}T00:00:00`))}</td>
+      <td class="amount-cell">${escapeHtml(formatMoney(sale.amount))}</td>
+      <td><button class="delete-button" type="button" data-delete-id="${escapeHtml(sale.id)}" aria-label="Hapus transaksi ${escapeHtml(sale.model)}">×</button></td>`;
     return row;
   }));
+
+  const hasSales = filtered.length > 0;
+  emptyState.classList.toggle("visible", !hasSales);
+  transactionList.hidden = !hasSales;
+  document.querySelector("#empty-title").textContent = sales.length ? "Transaksi tidak ditemukan" : "Belum ada penjualan";
+  document.querySelector("#empty-copy").textContent = sales.length
+    ? "Coba ubah kata kunci atau filter pembayaran."
+    : "Yuk, catat transaksi iPhone pertamamu.";
+  document.querySelector(".sales-page .empty-state [data-open-modal]").hidden = sales.length > 0;
+  document.querySelector("#transaction-count").textContent = `${filtered.length} transaksi`;
 }
 
-function drawCashflow() {
-  const canvas = document.querySelector("#cashflow-chart");
-  const context = canvas.getContext("2d");
-  if (!context) return;
-  const bounds = canvas.getBoundingClientRect();
-  const scale = window.devicePixelRatio || 1;
-  canvas.width = Math.max(1, Math.floor(bounds.width * scale));
-  canvas.height = Math.max(1, Math.floor(bounds.height * scale));
-  context.scale(scale, scale);
-
-  const width = bounds.width;
-  const height = bounds.height;
-  const left = 34;
-  const right = 6;
-  const top = 7;
-  const bottom = 23;
-  const chartHeight = height - top - bottom;
-  const now = new Date();
-  const days = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6 + index);
-    const key = localDateKey(date);
-    const matching = transactions.filter((item) => item.date === key);
-    return {
-      label: new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(date).slice(0, 3),
-      income: sumFor(matching, "income"),
-      expense: sumFor(matching, "expense"),
-    };
-  });
-  const maxValue = Math.max(1, ...days.flatMap((day) => [day.income, day.expense]));
-  const chartWidth = width - left - right;
-  const groupWidth = chartWidth / days.length;
-  const barWidth = Math.min(12, groupWidth * 0.25);
-  const gridValues = [0, 0.5, 1];
-
-  context.font = "9px 'DM Sans', sans-serif";
-  context.textBaseline = "middle";
-  gridValues.forEach((point) => {
-    const y = top + chartHeight * point;
-    context.strokeStyle = "#eff1ed";
-    context.lineWidth = 1;
-    context.beginPath();
-    context.moveTo(left, y);
-    context.lineTo(width - right, y);
-    context.stroke();
-    context.fillStyle = "#a3aaa2";
-    context.textAlign = "left";
-    context.fillText(point === 1 ? "0" : shortMoneyFormat.format(Math.round(maxValue * (1 - point))), 0, y);
-  });
-
-  days.forEach((day, index) => {
-    const center = left + groupWidth * (index + 0.5);
-    const incomeHeight = (day.income / maxValue) * (chartHeight - 2);
-    const expenseHeight = (day.expense / maxValue) * (chartHeight - 2);
-    context.fillStyle = "#82ad90";
-    roundRect(context, center - barWidth - 1, top + chartHeight - incomeHeight, barWidth, Math.max(incomeHeight, day.income ? 2 : 0), 3);
-    context.fillStyle = "#e5b292";
-    roundRect(context, center + 1, top + chartHeight - expenseHeight, barWidth, Math.max(expenseHeight, day.expense ? 2 : 0), 3);
-    context.fillStyle = "#9ca39b";
-    context.textAlign = "center";
-    context.fillText(day.label, center, height - 8);
-  });
+function itemsForActivePeriod() {
+  const sorted = [...financeTransactions].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  if (activePeriod === "day") return sorted.filter((item) => item.date === localDateKey(new Date()));
+  if (activePeriod === "month") return currentMonthItems(sorted);
+  return sorted;
 }
 
-function roundRect(context, x, y, width, height, radius) {
-  if (height <= 0) return;
-  const actualRadius = Math.min(radius, width / 2, height / 2);
-  context.beginPath();
-  context.roundRect(x, y, width, height, actualRadius);
-  context.fill();
+function renderFinanceTransactions() {
+  const filtered = itemsForActivePeriod();
+  financeTransactionList.replaceChildren(...filtered.map((item) => {
+    const row = document.createElement("tr");
+    const category = [...financeCategories.income, ...financeCategories.expense].find((entry) => entry.name === item.category);
+    row.innerHTML = `
+      <td><span class="finance-name"><span class="finance-symbol">${category ? category.icon : "✦"}</span><span class="finance-description">${escapeHtml(item.description)}</span></span></td>
+      <td><span class="category-tag">${escapeHtml(item.category)}</span></td>
+      <td class="date-cell">${dateFormat.format(new Date(`${item.date}T00:00:00`))}</td>
+      <td class="amount-cell ${item.type}">${item.type === "income" ? "+" : "−"}${escapeHtml(formatMoney(item.amount))}</td>
+      <td><button class="delete-button" type="button" data-finance-delete-id="${escapeHtml(item.id)}" aria-label="Hapus ${escapeHtml(item.description)}">×</button></td>`;
+    return row;
+  }));
+  const hasTransactions = filtered.length > 0;
+  const financeEmptyState = document.querySelector("#finance-empty-state");
+  financeEmptyState.classList.toggle("visible", !hasTransactions);
+  financeTransactionList.hidden = !hasTransactions;
+  document.querySelector("#finance-empty-title").textContent = financeTransactions.length
+    ? "Belum ada transaksi di periode ini"
+    : "Belum ada transaksi keuangan";
+  document.querySelector("#finance-empty-copy").textContent = financeTransactions.length
+    ? "Coba pilih periode lain atau catat transaksi baru."
+    : "Mulai catat pemasukan atau pengeluaranmu.";
+  document.querySelector("#finance-transaction-count").textContent = `${filtered.length} transaksi`;
 }
 
 function render() {
-  renderSummary();
-  renderTransactions();
-  renderBudgets();
-  drawCashflow();
-}
-
-function populateCategories(type) {
-  const options = categories[type].map((category) => {
-    const option = document.createElement("option");
-    option.value = category.name;
-    option.textContent = `${category.icon}  ${category.name}`;
-    return option;
-  });
-  categoryInput.replaceChildren(...options);
-}
-
-function renderBudgetFields() {
-  budgetFields.replaceChildren(...categories.expense.map((category) => {
-    const field = document.createElement("div");
-    field.className = "budget-field";
-    const label = document.createElement("label");
-    label.htmlFor = `budget-${category.name}`;
-    label.textContent = `${category.icon}  ${category.name}`;
-    const amount = document.createElement("div");
-    amount.className = "amount-input";
-    amount.innerHTML = '<span>Rp</span>';
-    const input = document.createElement("input");
-    input.className = "form-control";
-    input.id = `budget-${category.name}`;
-    input.name = category.name;
-    input.type = "number";
-    input.min = "1";
-    input.step = "1";
-    input.inputMode = "numeric";
-    input.required = true;
-    input.value = String(budgets[category.name]);
-    amount.append(input);
-    field.append(label, amount);
-    return field;
-  }));
+  renderFinanceSummary();
+  renderFinanceTransactions();
+  renderSalesSummary();
+  renderSalesTransactions();
 }
 
 function showToast(message) {
@@ -325,112 +269,204 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
 }
 
-document.querySelectorAll("[data-open-modal]").forEach((button) => {
-  button.addEventListener("click", () => {
-    form.reset();
-    activeType = "expense";
-    typeInput.value = activeType;
-    document.querySelectorAll(".type-option").forEach((option) => option.classList.toggle("selected", option.dataset.type === activeType));
-    populateCategories(activeType);
-    document.querySelector("#date").value = localDateKey(new Date());
-    dialog.showModal();
-    document.querySelector("#description").focus();
+function populateFinanceCategories(type) {
+  const options = financeCategories[type].map((category) => {
+    const option = document.createElement("option");
+    option.value = category.name;
+    option.textContent = `${category.icon}  ${category.name}`;
+    return option;
   });
+  financeCategoryInput.replaceChildren(...options);
+}
+
+function setPage(page) {
+  currentPage = page === "iphone-sales" ? "iphone-sales" : "finance";
+  const isFinance = currentPage === "finance";
+  document.querySelector("#finance").hidden = !isFinance;
+  document.querySelector("#iphone-sales").hidden = isFinance;
+  document.querySelectorAll("[data-page-link]").forEach((link) =>
+    link.classList.toggle("active", link.dataset.pageLink === currentPage),
+  );
+  document.querySelectorAll(".mobile-nav-link").forEach((link) =>
+    link.setAttribute("aria-current", link.dataset.pageLink === currentPage ? "page" : "false"),
+  );
+  document.querySelector("#today-label").textContent = isFinance
+    ? "KEUANGAN PRIBADI · HARIAN & BULANAN"
+    : "TOKO IPHONE · TRANSAKSI";
+  document.querySelector("#page-title").innerHTML = isFinance
+    ? "Keuanganmu, <span>lebih terarah.</span>"
+    : "Kelola penjualan, <span>lebih mudah.</span>";
+  pageAction.innerHTML = isFinance
+    ? '<span class="plus">+</span> Catat transaksi'
+    : '<span class="plus">+</span> Catat penjualan';
+  pageAction.removeAttribute("data-open-modal");
+  if (!isFinance) {
+    pageAction.removeAttribute("data-open-finance-modal");
+    pageAction.setAttribute("data-open-sales-modal", "");
+  } else {
+    pageAction.removeAttribute("data-open-sales-modal");
+    pageAction.setAttribute("data-open-finance-modal", "");
+  }
+}
+
+document.querySelector("#current-date").textContent = new Intl.DateTimeFormat("id-ID", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+}).format(new Date());
+document.querySelectorAll("[data-page-link]").forEach((link) => {
+  link.addEventListener("click", () => setPage(link.dataset.pageLink));
+});
+window.addEventListener("hashchange", () => {
+  setPage(window.location.hash === "#iphone-sales" ? "iphone-sales" : "finance");
 });
 
-document.querySelectorAll("[data-close-modal]").forEach((button) => button.addEventListener("click", () => dialog.close()));
-document.querySelector("#edit-budgets").addEventListener("click", () => {
-  renderBudgetFields();
-  budgetDialog.showModal();
+document.querySelectorAll("[data-open-finance-modal]:not(#page-action)").forEach((button) => {
+  button.addEventListener("click", () => openFinanceDialog());
 });
-document.querySelector("[data-close-budget]").addEventListener("click", () => budgetDialog.close());
+document.querySelectorAll("[data-open-modal]").forEach((button) => {
+  button.addEventListener("click", () => openSalesDialog());
+});
+pageAction.addEventListener("click", () => {
+  if (currentPage === "finance") openFinanceDialog();
+  else openSalesDialog();
+});
+
+function openFinanceDialog() {
+  financeForm.reset();
+  activeFinanceType = "expense";
+  financeTypeInput.value = activeFinanceType;
+  document.querySelectorAll("[data-finance-type]").forEach((button) =>
+    button.classList.toggle("selected", button.dataset.financeType === activeFinanceType),
+  );
+  populateFinanceCategories(activeFinanceType);
+  document.querySelector("#finance-date").value = localDateKey(new Date());
+  financeDialog.showModal();
+  document.querySelector("#finance-description").focus();
+}
+
+function openSalesDialog() {
+  form.reset();
+  document.querySelector("#date").value = localDateKey(new Date());
+  dialog.showModal();
+  document.querySelector("#model").focus();
+}
+
+document.querySelector("[data-close-modal]").addEventListener("click", () => dialog.close());
 dialog.addEventListener("click", (event) => {
   if (event.target === dialog) dialog.close();
 });
-budgetDialog.addEventListener("click", (event) => {
-  if (event.target === budgetDialog) budgetDialog.close();
+document.querySelector("[data-close-finance-modal]").addEventListener("click", () => financeDialog.close());
+financeDialog.addEventListener("click", (event) => {
+  if (event.target === financeDialog) financeDialog.close();
 });
 
-budgetForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const formData = new FormData(budgetForm);
-  const updatedBudgets = Object.fromEntries(categories.expense.map((category) => [category.name, Number(formData.get(category.name))]));
-  if (Object.values(updatedBudgets).some((amount) => !Number.isSafeInteger(amount) || amount <= 0)) {
-    showToast("Masukkan batas anggaran dalam jumlah rupiah yang valid.");
-    return;
-  }
-  const previousBudgets = budgets;
-  budgets = updatedBudgets;
-  if (!saveBudgets()) {
-    budgets = previousBudgets;
-    return;
-  }
-  renderBudgets();
-  budgetDialog.close();
-  showToast("Anggaran berhasil diperbarui.");
-});
-
-document.querySelectorAll(".type-option").forEach((button) => {
+document.querySelectorAll("[data-finance-type]").forEach((button) => {
   button.addEventListener("click", () => {
-    activeType = button.dataset.type;
-    typeInput.value = activeType;
-    document.querySelectorAll(".type-option").forEach((option) => option.classList.toggle("selected", option === button));
-    populateCategories(activeType);
+    activeFinanceType = button.dataset.financeType;
+    financeTypeInput.value = activeFinanceType;
+    document.querySelectorAll("[data-finance-type]").forEach((option) =>
+      option.classList.toggle("selected", option === button),
+    );
+    populateFinanceCategories(activeFinanceType);
   });
 });
 
-form.addEventListener("submit", (event) => {
+financeForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const formData = new FormData(form);
-  const description = String(formData.get("description") || "").trim();
-  const amount = Number(formData.get("amount"));
-  const date = String(formData.get("date") || "");
-  const category = String(formData.get("category") || "");
-
-  if (!description || !Number.isSafeInteger(amount) || amount <= 0 || !isValidDate(date) || !categories[activeType].some((item) => item.name === category)) {
+  const formData = new FormData(financeForm);
+  const item = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    type: activeFinanceType,
+    description: String(formData.get("description") || "").trim(),
+    amount: Number(formData.get("amount")),
+    category: String(formData.get("category") || ""),
+    date: String(formData.get("date") || ""),
+  };
+  if (!item.description || !Number.isSafeInteger(item.amount) || item.amount <= 0 ||
+      !isValidDate(item.date) || !financeCategories[activeFinanceType].some((category) => category.name === item.category)) {
     showToast("Periksa kembali detail transaksi.");
     return;
   }
-  const transaction = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    type: activeType,
-    description,
-    amount,
-    category,
-    date,
-  };
-  transactions.push(transaction);
-  if (!saveTransactions()) {
-    transactions.pop();
+  financeTransactions.push(item);
+  if (!saveData(FINANCE_STORAGE_KEY, financeTransactions, "keuangan")) {
+    financeTransactions.pop();
     return;
   }
   render();
-  dialog.close();
+  financeDialog.close();
   showToast("Transaksi berhasil disimpan.");
 });
 
-transactionList.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-delete-id]");
+financeTransactionList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-finance-delete-id]");
   if (!button) return;
-  const previous = transactions;
-  transactions = transactions.filter((item) => item.id !== button.dataset.deleteId);
-  if (!saveTransactions()) {
-    transactions = previous;
+  const previous = financeTransactions;
+  financeTransactions = financeTransactions.filter((item) => item.id !== button.dataset.financeDeleteId);
+  if (!saveData(FINANCE_STORAGE_KEY, financeTransactions, "keuangan")) {
+    financeTransactions = previous;
     return;
   }
   render();
   showToast("Transaksi dihapus.");
 });
 
-searchInput.addEventListener("input", renderTransactions);
-typeFilter.addEventListener("change", renderTransactions);
-window.addEventListener("resize", drawCashflow);
-window.addEventListener("hashchange", () => {
-  const activeHash = window.location.hash || "#overview";
-  document.querySelectorAll(".nav-link").forEach((link) => link.classList.toggle("active", link.getAttribute("href") === activeHash));
+financeSearchPeriods.forEach((button) => {
+  button.addEventListener("click", () => {
+    activePeriod = button.dataset.period;
+    financeSearchPeriods.forEach((periodButton) =>
+      periodButton.classList.toggle("active", periodButton === button),
+    );
+    renderFinanceTransactions();
+  });
 });
 
-document.querySelector("#today-label").textContent = new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long" }).format(new Date()).toLocaleUpperCase("id-ID");
-populateCategories(activeType);
-renderBudgetFields();
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(form);
+  const sale = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    model: String(formData.get("model") || "").trim(),
+    storage: String(formData.get("storage") || ""),
+    color: String(formData.get("color") || "").trim(),
+    customer: String(formData.get("customer") || "").trim(),
+    payment: String(formData.get("payment") || ""),
+    amount: Number(formData.get("amount")),
+    date: String(formData.get("date") || ""),
+  };
+  if (!sale.model || !sale.storage || !sale.color || !sale.customer ||
+      !paymentMethods.includes(sale.payment) || !Number.isSafeInteger(sale.amount) ||
+      sale.amount <= 0 || !isValidDate(sale.date)) {
+    showToast("Periksa kembali detail penjualan.");
+    return;
+  }
+  sales.push(sale);
+  if (!saveData(SALES_STORAGE_KEY, sales, "penjualan")) {
+    sales.pop();
+    return;
+  }
+  render();
+  dialog.close();
+  showToast("Penjualan berhasil disimpan.");
+});
+
+transactionList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-delete-id]");
+  if (!button) return;
+  const previous = sales;
+  sales = sales.filter((sale) => sale.id !== button.dataset.deleteId);
+  if (!saveData(SALES_STORAGE_KEY, sales, "penjualan")) {
+    sales = previous;
+    return;
+  }
+  render();
+  showToast("Transaksi penjualan dihapus.");
+});
+
+searchInput.addEventListener("input", renderSalesTransactions);
+paymentFilter.addEventListener("change", renderSalesTransactions);
+
+populateFinanceCategories(activeFinanceType);
+setPage(window.location.hash === "#iphone-sales" ? "iphone-sales" : "finance");
 render();

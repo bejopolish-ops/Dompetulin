@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f6f7f4" />
-    <title>RuangUang — Atur keuanganmu</title>
+    <meta name="theme-color" content="#f5f6f8" />
+    <meta name="description" content="Kelola keuangan harian dan bulanan, serta catat penjualan iPhone dalam satu aplikasi." />
+    <title>RuangUang — Keuangan & Penjualan iPhone</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -14,154 +15,244 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar">
-        <a class="brand" href="#overview" aria-label="RuangUang beranda">
+        <a class="brand" href="#finance" aria-label="RuangUang beranda">
           <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32" fill="none"><path d="M5 10.5A3.5 3.5 0 0 1 8.5 7H25v18H8.5A3.5 3.5 0 0 1 5 21.5v-11Z" stroke="currentColor" stroke-width="2.4"/><path d="M5 11h20M20 17h8v5h-8a2.5 2.5 0 1 1 0-5Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="21" cy="19.5" r=".8" fill="currentColor"/></svg>
+            <svg viewBox="0 0 32 32" fill="none"><rect x="8" y="3.5" width="16" height="25" rx="4" stroke="currentColor" stroke-width="2.2"/><path d="M13 7h6M14.5 24.5h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           </span>
           <span>ruang<span class="brand-light">uang</span></span>
         </a>
 
-        <div class="nav-label">MENU</div>
+        <div class="nav-label">WORKSPACE</div>
         <nav class="main-nav" aria-label="Navigasi utama">
-          <a class="nav-link active" href="#overview">
+          <a class="nav-link active" href="#finance" data-page-link="finance">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="11" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="8" height="7" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
-            Ringkasan
+            Keuangan
           </a>
-          <a class="nav-link" href="#transactions">
+          <a class="nav-link" href="#iphone-sales" data-page-link="iphone-sales">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3v3m10-3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m9 14 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Transaksi
-          </a>
-          <a class="nav-link" href="#budgets">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V9m5 10V5m6 14v-7m5 7V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M2 21h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            Anggaran
+            Jualan iPhone
           </a>
         </nav>
 
         <div class="sidebar-bottom">
           <div class="sidebar-tip">
             <span class="tip-icon" aria-hidden="true">✦</span>
-            <p class="tip-title">Sedikit demi sedikit</p>
-            <p class="tip-copy">Kebiasaan kecil hari ini, bikin tujuan besar terasa lebih dekat.</p>
+            <p class="tip-title">Semua dalam satu</p>
+            <p class="tip-copy">Keuangan pribadi dan penjualan iPhone, tercatat rapi.</p>
           </div>
           <div class="privacy-note"><span class="privacy-dot"></span> Data tersimpan di perangkatmu</div>
         </div>
       </aside>
 
-      <main class="main-content" id="overview">
+      <nav class="mobile-nav" aria-label="Navigasi utama">
+        <a class="mobile-nav-link active" href="#finance" data-page-link="finance">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="11" width="7" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="8" height="7" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span>Keuangan</span>
+        </a>
+        <a class="mobile-nav-link" href="#iphone-sales" data-page-link="iphone-sales">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.8" stroke="currentColor" stroke-width="1.8"/><path d="M10 5h4M10.5 18.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span>Jualan iPhone</span>
+        </a>
+      </nav>
+
+      <main class="main-content" id="app-main">
         <header class="topbar">
           <div class="mobile-brand"><span class="brand-mark"><svg viewBox="0 0 32 32" fill="none"><path d="M5 10.5A3.5 3.5 0 0 1 8.5 7H25v18H8.5A3.5 3.5 0 0 1 5 21.5v-11Z" stroke="currentColor" stroke-width="2.4"/><path d="M5 11h20M20 17h8v5h-8a2.5 2.5 0 1 1 0-5Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><b>ruang<span class="brand-light">uang</span></b></div>
           <div class="greeting">
-            <p class="eyebrow" id="today-label">RINGKASAN KEUANGAN</p>
-            <h1>Keuanganmu, <span>lebih terarah.</span></h1>
+            <p class="eyebrow" id="today-label">KEUANGAN PRIBADI · HARIAN & BULANAN</p>
+            <h1 id="page-title">Keuanganmu, <span>lebih terarah.</span></h1>
           </div>
-          <button class="primary-button top-add" type="button" data-open-modal>
+          <button class="primary-button top-add" id="page-action" type="button" data-open-finance-modal>
             <span class="plus">+</span> Catat transaksi
           </button>
         </header>
 
-        <section class="summary-grid" aria-label="Ringkasan keuangan">
-          <article class="summary-card balance-card">
-            <div class="card-topline"><span>Total saldo</span><span class="card-icon balance-icon" aria-hidden="true">↗</span></div>
-            <p class="summary-value" id="balance-total">Rp0</p>
-            <p class="card-caption"><span class="status-dot"></span> Saldo dari semua transaksi</p>
-            <div class="balance-decoration" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-          </article>
-          <article class="summary-card">
-            <div class="card-topline"><span>Pemasukan bulan ini</span><span class="card-icon income-icon" aria-hidden="true">↓</span></div>
-            <p class="summary-value" id="income-total">Rp0</p>
-            <p class="card-caption" id="income-caption">Belum ada pemasukan bulan ini</p>
-          </article>
-          <article class="summary-card">
-            <div class="card-topline"><span>Pengeluaran bulan ini</span><span class="card-icon expense-icon" aria-hidden="true">↑</span></div>
-            <p class="summary-value" id="expense-total">Rp0</p>
-            <p class="card-caption" id="expense-caption">Belum ada pengeluaran bulan ini</p>
-          </article>
+        <section class="page-view finance-page" id="finance">
+          <section class="welcome-banner finance-banner" aria-label="Ringkasan keuangan">
+            <div>
+              <p class="banner-kicker">KEUANGAN PRIBADI</p>
+              <h2>Hai, semangat atur uang! <span>👋</span></h2>
+              <p class="banner-copy">Pantau pemasukan dan pengeluaranmu setiap hari.</p>
+            </div>
+            <div class="banner-art finance-art" aria-hidden="true"><span class="finance-art-circle"></span><span class="finance-art-card">Rp</span></div>
+            <div class="banner-date"><span class="live-dot"></span><span id="finance-today-date"></span></div>
+          </section>
+
+          <section class="finance-summary-grid" aria-label="Ringkasan keuangan harian dan bulanan">
+            <article class="summary-card balance-card">
+              <div class="card-topline"><span>Total saldo</span><span class="card-icon revenue-icon" aria-hidden="true">↗</span></div>
+              <p class="summary-value" id="finance-balance">Rp0</p>
+              <p class="card-caption"><span class="status-dot"></span> Akumulasi semua transaksi</p>
+              <div class="revenue-decoration" aria-hidden="true"></div>
+            </article>
+            <article class="summary-card">
+              <div class="card-topline"><span>Pemasukan hari ini</span><span class="card-icon units-icon" aria-hidden="true">↓</span></div>
+              <p class="summary-value" id="daily-income">Rp0</p>
+              <p class="card-caption" id="daily-income-caption">Hari ini</p>
+            </article>
+            <article class="summary-card">
+              <div class="card-topline"><span>Pengeluaran hari ini</span><span class="card-icon expense-icon" aria-hidden="true">↑</span></div>
+              <p class="summary-value" id="daily-expense">Rp0</p>
+              <p class="card-caption" id="daily-expense-caption">Hari ini</p>
+            </article>
+            <article class="summary-card">
+              <div class="card-topline"><span>Pemasukan bulan ini</span><span class="card-icon units-icon" aria-hidden="true">↓</span></div>
+              <p class="summary-value" id="monthly-income">Rp0</p>
+              <p class="card-caption" id="monthly-income-caption">Bulan ini</p>
+            </article>
+            <article class="summary-card">
+              <div class="card-topline"><span>Pengeluaran bulan ini</span><span class="card-icon expense-icon" aria-hidden="true">↑</span></div>
+              <p class="summary-value" id="monthly-expense">Rp0</p>
+              <p class="card-caption" id="monthly-expense-caption">Bulan ini</p>
+            </article>
+          </section>
+
+          <section class="panel finance-transactions-panel">
+            <div class="transactions-heading">
+              <div><p class="eyebrow">CATATAN KEUANGAN</p><h2>Transaksi harian & bulanan</h2><p class="section-copy">Keuangan pribadimu terpisah dari penjualan iPhone.</p></div>
+              <div class="finance-filters" role="group" aria-label="Filter periode transaksi">
+                <button class="period-button active" type="button" data-period="day">Hari ini</button>
+                <button class="period-button" type="button" data-period="month">Bulan ini</button>
+                <button class="period-button" type="button" data-period="all">Semua</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="finance-table">
+                <thead><tr><th>TRANSAKSI</th><th>KATEGORI</th><th>TANGGAL</th><th class="amount-heading">JUMLAH</th><th><span class="sr-only">Aksi</span></th></tr></thead>
+                <tbody id="finance-transaction-list"></tbody>
+              </table>
+              <div class="empty-state visible" id="finance-empty-state">
+                <span class="empty-icon" aria-hidden="true">＋</span>
+                <strong id="finance-empty-title">Belum ada transaksi keuangan</strong>
+                <p id="finance-empty-copy">Mulai catat pemasukan atau pengeluaranmu.</p>
+                <button class="text-button" type="button" data-open-finance-modal>Catat transaksi <span>→</span></button>
+              </div>
+            </div>
+            <div class="table-footer"><span id="finance-transaction-count">0 transaksi</span><span>Data tersimpan di perangkatmu.</span></div>
+          </section>
+          <footer class="page-footer">Keuangan lebih tertata, langkah terasa lebih ringan <span>✦</span></footer>
         </section>
 
-        <section class="insights-grid" aria-label="Analisis keuangan">
-          <article class="panel cashflow-panel">
-            <div class="panel-heading">
-              <div><p class="eyebrow">ARUS KAS</p><h2>Pergerakan uang</h2></div>
-              <span class="period-pill" id="chart-period">7 hari terakhir</span>
-            </div>
-            <div class="chart-legend"><span><i class="legend-dot income-legend"></i>Pemasukan</span><span><i class="legend-dot expense-legend"></i>Pengeluaran</span></div>
-            <div class="chart-wrap"><canvas id="cashflow-chart" aria-label="Grafik pemasukan dan pengeluaran selama tujuh hari terakhir"></canvas></div>
+        <section class="page-view sales-page" id="iphone-sales" hidden>
+        <section class="welcome-banner" aria-label="Informasi halaman">
+          <div>
+            <p class="banner-kicker">PANEL PENJUALAN</p>
+            <h2>Hai, Seller <span>👋</span></h2>
+            <p class="banner-copy">Pantau omzet dan transaksi iPhone-mu hari ini.</p>
+          </div>
+          <div class="banner-art" aria-hidden="true">
+            <span class="art-glow"></span>
+            <span class="art-phone phone-back"></span>
+            <span class="art-phone phone-front"><i></i></span>
+          </div>
+          <div class="banner-date"><span class="live-dot"></span><span id="current-date"></span></div>
+        </section>
+
+        <section class="summary-grid" aria-label="Ringkasan penjualan bulan ini">
+          <article class="summary-card revenue-card">
+            <div class="card-topline"><span>Omzet bulan ini</span><span class="card-icon revenue-icon" aria-hidden="true">↗</span></div>
+            <p class="summary-value" id="revenue-total">Rp0</p>
+            <p class="card-caption"><span class="status-dot"></span> Total nilai penjualan</p>
+            <div class="revenue-decoration" aria-hidden="true"></div>
           </article>
-          <article class="panel budget-panel" id="budgets">
-            <div class="panel-heading">
-              <div><p class="eyebrow">PANTAU PENGELUARAN</p><h2>Anggaran kategori</h2></div>
-              <div class="budget-actions"><span class="month-label" id="budget-month"></span><button class="budget-edit-button" type="button" id="edit-budgets">Atur</button></div>
-            </div>
-            <div class="budget-list" id="budget-list"></div>
-            <p class="budget-footnote">Batas anggaran bulanan · disimpan di perangkatmu</p>
+          <article class="summary-card">
+            <div class="card-topline"><span>iPhone terjual</span><span class="card-icon units-icon" aria-hidden="true">▣</span></div>
+            <p class="summary-value" id="units-total">0 unit</p>
+            <p class="card-caption" id="units-caption">Belum ada unit terjual bulan ini</p>
+          </article>
+          <article class="summary-card">
+            <div class="card-topline"><span>Transaksi bulan ini</span><span class="card-icon sales-icon" aria-hidden="true">↗</span></div>
+            <p class="summary-value" id="sales-total">0</p>
+            <p class="card-caption" id="sales-caption">Catatan penjualan bulan ini</p>
           </article>
         </section>
 
         <section class="panel transactions-panel" id="transactions">
           <div class="transactions-heading">
-            <div><p class="eyebrow">AKTIVITAS TERBARU</p><h2>Transaksi</h2></div>
+            <div><p class="eyebrow">CATATAN TOKO</p><h2>Transaksi penjualan</h2><p class="section-copy">Daftar penjualan iPhone yang sudah tercatat.</p></div>
             <div class="transaction-controls">
               <label class="search-box">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-                <input type="search" id="search-input" placeholder="Cari transaksi..." aria-label="Cari transaksi" />
+                <input type="search" id="search-input" placeholder="Cari model atau pembeli..." aria-label="Cari model atau pembeli" />
               </label>
-              <select id="type-filter" class="filter-select" aria-label="Filter jenis transaksi">
-                <option value="all">Semua</option>
-                <option value="income">Pemasukan</option>
-                <option value="expense">Pengeluaran</option>
+              <select id="payment-filter" class="filter-select" aria-label="Filter metode pembayaran">
+                <option value="all">Semua pembayaran</option>
+                <option value="Transfer">Transfer</option>
+                <option value="Tunai">Tunai</option>
+                <option value="QRIS">QRIS</option>
               </select>
             </div>
           </div>
           <div class="table-scroll">
             <table>
-              <thead><tr><th>TRANSAKSI</th><th>KATEGORI</th><th>TANGGAL</th><th class="amount-heading">JUMLAH</th><th><span class="sr-only">Aksi</span></th></tr></thead>
+              <thead><tr><th>PRODUK</th><th>PEMBELI</th><th>PEMBAYARAN</th><th>TANGGAL</th><th class="amount-heading">HARGA JUAL</th><th><span class="sr-only">Aksi</span></th></tr></thead>
               <tbody id="transaction-list"></tbody>
             </table>
             <div class="empty-state" id="empty-state">
-              <span class="empty-icon" aria-hidden="true">＋</span>
-              <strong>Belum ada transaksi</strong>
-              <p>Mulai catat pemasukan atau pengeluaran pertamamu.</p>
-              <button class="text-button" type="button" data-open-modal>Tambah transaksi <span>→</span></button>
+              <span class="empty-icon" aria-hidden="true">▣</span>
+              <strong id="empty-title">Belum ada penjualan</strong>
+              <p id="empty-copy">Yuk, catat transaksi iPhone pertamamu.</p>
+              <button class="text-button" type="button" data-open-modal>Catat penjualan <span>→</span></button>
             </div>
           </div>
-          <div class="table-footer"><span id="transaction-count">0 transaksi</span><span>Data pribadimu, selalu dalam kendalimu.</span></div>
+          <div class="table-footer"><span id="transaction-count">0 transaksi</span><span>Data penjualan tersimpan di perangkatmu.</span></div>
         </section>
 
-        <footer class="page-footer">Dibuat untuk keputusan finansial yang lebih tenang <span>✦</span></footer>
+        <footer class="page-footer">Dibuat untuk membantu tokomu terus berkembang <span>✦</span></footer>
+        </section>
       </main>
     </div>
 
     <dialog class="transaction-dialog" id="transaction-dialog" aria-labelledby="dialog-title">
       <form id="transaction-form">
         <div class="dialog-heading">
-          <div><p class="eyebrow">CATAT AKTIVITAS</p><h2 id="dialog-title">Transaksi baru</h2></div>
+          <div><p class="eyebrow">TRANSAKSI TOKO</p><h2 id="dialog-title">Catat penjualan</h2></div>
           <button class="close-button" type="button" aria-label="Tutup" data-close-modal>×</button>
         </div>
-        <div class="type-toggle" role="group" aria-label="Jenis transaksi">
-          <button type="button" class="type-option selected" data-type="expense">Pengeluaran</button>
-          <button type="button" class="type-option" data-type="income">Pemasukan</button>
-        </div>
-        <input type="hidden" name="type" id="form-type" value="expense" />
-        <label class="field-label" for="description">Nama transaksi</label>
-        <input class="form-control" id="description" name="description" type="text" maxlength="60" placeholder="Contoh: Belanja mingguan" required />
-        <label class="field-label" for="amount">Jumlah</label>
-        <div class="amount-input"><span>Rp</span><input class="form-control" id="amount" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" required /></div>
+        <label class="field-label" for="model">Model iPhone</label>
+        <input class="form-control" id="model" name="model" type="text" list="iphone-models" maxlength="50" placeholder="Contoh: iPhone 16 Pro Max" required />
+        <datalist id="iphone-models">
+          <option value="iPhone 17 Pro Max"></option><option value="iPhone 17 Pro"></option><option value="iPhone 17"></option><option value="iPhone Air"></option>
+          <option value="iPhone 16 Pro Max"></option><option value="iPhone 16 Pro"></option><option value="iPhone 16 Plus"></option><option value="iPhone 16"></option>
+          <option value="iPhone 15 Pro Max"></option><option value="iPhone 15 Pro"></option><option value="iPhone 15 Plus"></option><option value="iPhone 15"></option>
+          <option value="iPhone 14 Pro Max"></option><option value="iPhone 14 Pro"></option><option value="iPhone 14 Plus"></option><option value="iPhone 14"></option>
+          <option value="iPhone 13"></option><option value="iPhone 12"></option><option value="iPhone SE"></option>
+        </datalist>
         <div class="form-row">
-          <div><label class="field-label" for="category">Kategori</label><select class="form-control" id="category" name="category" required></select></div>
-          <div><label class="field-label" for="date">Tanggal</label><input class="form-control" id="date" name="date" type="date" required /></div>
+          <div><label class="field-label" for="storage">Kapasitas</label><select class="form-control" id="storage" name="storage" required><option value="" disabled selected>Pilih kapasitas</option><option>64 GB</option><option>128 GB</option><option>256 GB</option><option>512 GB</option><option>1 TB</option><option>2 TB</option></select></div>
+          <div><label class="field-label" for="color">Warna</label><input class="form-control" id="color" name="color" type="text" maxlength="30" placeholder="Contoh: Natural Titanium" required /></div>
         </div>
-        <button class="primary-button submit-button" type="submit">Simpan transaksi <span>→</span></button>
+        <label class="field-label" for="customer">Nama pembeli</label>
+        <input class="form-control" id="customer" name="customer" type="text" maxlength="60" placeholder="Nama pelanggan" required />
+        <div class="form-row">
+          <div><label class="field-label" for="payment">Metode pembayaran</label><select class="form-control" id="payment" name="payment" required><option value="Transfer">Transfer</option><option value="Tunai">Tunai</option><option value="QRIS">QRIS</option></select></div>
+          <div><label class="field-label" for="date">Tanggal penjualan</label><input class="form-control" id="date" name="date" type="date" required /></div>
+        </div>
+        <label class="field-label" for="amount">Harga jual</label>
+        <div class="amount-input"><span>Rp</span><input class="form-control" id="amount" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="Contoh: 18999000" required /></div>
+        <button class="primary-button submit-button" type="submit">Simpan penjualan <span>→</span></button>
       </form>
     </dialog>
-    <dialog class="transaction-dialog budget-dialog" id="budget-dialog" aria-labelledby="budget-dialog-title">
-      <form id="budget-form">
+    <dialog class="transaction-dialog" id="finance-dialog" aria-labelledby="finance-dialog-title">
+      <form id="finance-form">
         <div class="dialog-heading">
-          <div><p class="eyebrow">RENCANAKAN PENGELUARAN</p><h2 id="budget-dialog-title">Atur anggaran bulanan</h2></div>
-          <button class="close-button" type="button" aria-label="Tutup" data-close-budget>×</button>
+          <div><p class="eyebrow">KEUANGAN PRIBADI</p><h2 id="finance-dialog-title">Catat transaksi</h2></div>
+          <button class="close-button" type="button" aria-label="Tutup" data-close-finance-modal>×</button>
         </div>
-        <p class="budget-dialog-copy">Tentukan batas untuk setiap kategori pengeluaran.</p>
-        <div class="budget-fields" id="budget-fields"></div>
-        <button class="primary-button submit-button" type="submit">Simpan anggaran <span>→</span></button>
+        <div class="type-toggle" role="group" aria-label="Jenis transaksi">
+          <button type="button" class="type-option selected" data-finance-type="expense">Pengeluaran</button>
+          <button type="button" class="type-option" data-finance-type="income">Pemasukan</button>
+        </div>
+        <input type="hidden" name="type" id="finance-type" value="expense" />
+        <label class="field-label" for="finance-description">Nama transaksi</label>
+        <input class="form-control" id="finance-description" name="description" type="text" maxlength="60" placeholder="Contoh: Makan siang" required />
+        <label class="field-label" for="finance-amount">Jumlah</label>
+        <div class="amount-input"><span>Rp</span><input class="form-control" id="finance-amount" name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" required /></div>
+        <div class="form-row">
+          <div><label class="field-label" for="finance-category">Kategori</label><select class="form-control" id="finance-category" name="category" required></select></div>
+          <div><label class="field-label" for="finance-date">Tanggal</label><input class="form-control" id="finance-date" name="date" type="date" required /></div>
+        </div>
+        <button class="primary-button submit-button" type="submit">Simpan transaksi <span>→</span></button>
       </form>
     </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
